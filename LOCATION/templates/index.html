@@ -1,0 +1,111 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Location Finder</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <style>
+        body {
+            font-family: 'Segoe UI', Arial, sans-serif;
+            background: #f4f6fb;
+            margin: 0;
+            padding: 0;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            min-height: 100vh;
+        }
+        .container {
+            background: #fff;
+            margin-top: 80px;
+            padding: 40px 30px 30px 30px;
+            border-radius: 16px;
+            box-shadow: 0 4px 24px rgba(0,0,0,0.08);
+            max-width: 400px;
+            width: 100%;
+            text-align: center;
+        }
+        h1 {
+            color: #2d3748;
+            margin-bottom: 18px;
+        }
+        .link-box {
+            display: flex;
+            align-items: center;
+            background: #f1f3f7;
+            border-radius: 8px;
+            padding: 10px 12px;
+            margin-bottom: 18px;
+            border: 1px solid #e2e8f0;
+        }
+        .link-input {
+            flex: 1;
+            border: none;
+            background: transparent;
+            font-size: 1rem;
+            color: #2d3748;
+            outline: none;
+        }
+        .copy-btn {
+            background: #3182ce;
+            color: #fff;
+            border: none;
+            border-radius: 6px;
+            padding: 7px 16px;
+            font-size: 1rem;
+            cursor: pointer;
+            margin-left: 10px;
+            transition: background 0.2s;
+        }
+        .copy-btn:hover {
+            background: #225ea8;
+        }
+        .copied {
+            color: #38a169;
+            font-size: 0.95rem;
+            margin-top: 8px;
+            display: none;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>Send this link to someone</h1>
+        <div class="link-box">
+            <input class="link-input" id="linkInput" type="text" value="{{ link }}" readonly>
+            <button class="copy-btn" onclick="copyLink()">Copy</button>
+        </div>
+        <div class="copied" id="copiedMsg">Copied!</div>
+        <button class="copy-btn" style="margin-top:18px;width:100%;background:#4a5568;" onclick="refreshLink()">Refresh / Change Link</button>
+        <div class="location-box" style="margin-top:28px;padding:18px 12px;background:#e6fffa;border-radius:8px;border:1px solid #b2f5ea;color:#234e52;font-size:1.08rem;">
+            <span>👇 Click the link above to find location.</span>
+        </div>
+        <button class="copy-btn" id="mapBtn" style="margin-top:18px;width:100%;background:#38a169;" onclick="openInMaps()" {% if not last_location %}disabled{% endif %}>Open Location in Google Maps</button>
+    </div>
+    <script>
+        function copyLink() {
+            var copyText = document.getElementById("linkInput");
+            copyText.select();
+            copyText.setSelectionRange(0, 99999); // For mobile
+            document.execCommand("copy");
+            var msg = document.getElementById("copiedMsg");
+            msg.style.display = 'block';
+            setTimeout(function() { msg.style.display = 'none'; }, 1500);
+        }
+        function refreshLink() {
+            window.location.reload();
+        }
+        // Enable Google Maps button if last_location is available
+        {% if last_location %}
+        document.addEventListener('DOMContentLoaded', function() {
+            var mapBtn = document.getElementById('mapBtn');
+            mapBtn.disabled = false;
+            mapBtn.onclick = function() {
+                var url = 'https://www.google.com/maps?q={{ last_location.lat }},{{ last_location.lon }}';
+                window.open(url, '_blank');
+            };
+        });
+        {% endif %}
+    </script>
+</body>
+</html>
